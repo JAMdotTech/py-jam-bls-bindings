@@ -75,6 +75,12 @@ cd /tmp
 ```
 
 `python -m build` builds the wheel from its freshly created source distribution.
+For a macOS local build with a universal2 Python, explicitly select the native
+architecture before building: for ARM64 use `ARCHFLAGS='-arch arm64'`,
+`_PYTHON_HOST_PLATFORM=macosx-11.0-arm64`, and `MACOSX_DEPLOYMENT_TARGET=11.0`;
+substitute `x86_64` for an Intel host. The artifact checker validates the native
+binary's architecture against its wheel tag. Release CI selects each target
+through cibuildwheel.
 To cross-verify against a retained original extension on a compatible Python:
 
 ```sh

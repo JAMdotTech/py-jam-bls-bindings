@@ -1,6 +1,7 @@
 """Check distributable contents, stable ABI tags, and publishable metadata."""
 import hashlib
 import sys
+import struct
 import tarfile
 import zipfile
 from email.parser import BytesParser
@@ -18,7 +19,19 @@ def main():
             with zipfile.ZipFile(path) as archive:
                 names = archive.namelist()
                 assert "jam_bls/__init__.py" in names
-                assert any(p.startswith("jam_bls/_native.") and p.endswith(".so") for p in names)
+                native_name = next(p for p in names if p.startswith("jam_bls/_native.") and p.endswith(".so"))
+                binary = archive.read(native_name)
+                if "macosx" in path.name:
+                    assert binary[:4] == b"\xcf\xfa\xed\xfe", "Expected a single-architecture Mach-O binary"
+                    cpu = struct.unpack_from("<I", binary, 4)[0]
+                    expected_cpu = 0x0100000C if path.name.endswith("_arm64.whl") else 0x01000007
+                    assert "universal2" not in path.name and cpu == expected_cpu, path.name
+                elif "manylinux" in path.name:
+                    assert binary[:4] == b"\x7fELF" and binary[4:6] == b"\x02\x01", "Expected ELF64 little-endian binary"
+                    machine = struct.unpack_from("<H", binary, 18)[0]
+                    assert machine == (183 if path.name.endswith("_aarch64.whl") else 62), path.name
+                else:
+                    raise AssertionError(f"Unsupported release platform: {path.name}")
                 metadata_name = next(p for p in names if p.endswith(".dist-info/METADATA"))
                 metadata = BytesParser().parsebytes(archive.read(metadata_name))
                 assert metadata["Name"] == "py-jam-bls-bindings"
