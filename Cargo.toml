@@ -1,0 +1,23 @@
+[package]
+name = "py-jam-bls-bindings"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.85"
+license = "GPL-3.0-only"
+authors = ["JAMdot Technologies <info@jamdot.tech>"]
+repository = "https://github.com/JAMdotTech/py-jam-bls-bindings"
+publish = false
+
+[lib]
+name = "_native"
+crate-type = ["cdylib"]
+path = "rust/src/lib.rs"
+
+[dependencies]
+pyo3 = { version = "=0.27.2", features = ["extension-module", "abi3-py312"] }
+w3f-bls = "=0.1.9"
+sha2 = "=0.10.9"
+
+[profile.release]
+lto = "thin"
+codegen-units = 1

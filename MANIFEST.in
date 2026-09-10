@@ -1,0 +1,6 @@
+include Cargo.toml Cargo.lock setup.cfg LICENSE PROVENANCE.md
+recursive-include LICENSES *
+recursive-include rust *.rs
+recursive-include tests *.py
+recursive-include scripts *.py
+recursive-include .github *.yml

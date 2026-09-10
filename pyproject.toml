@@ -1,0 +1,59 @@
+[build-system]
+requires = ["setuptools==80.9.0", "setuptools-rust==1.13.0", "wheel==0.45.1"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "py-jam-bls-bindings"
+version = "0.1.0"
+description = "JAM BLS12-381 double-key signing and aggregation bindings"
+readme = "README.md"
+license = "GPL-3.0-only"
+license-files = ["LICENSE", "LICENSES/*"]
+authors = [{name = "JAMdot Technologies", email = "info@jamdot.tech"}]
+requires-python = ">=3.12"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Programming Language :: Rust",
+    "Operating System :: MacOS :: MacOS X",
+    "Operating System :: POSIX :: Linux",
+]
+
+[project.optional-dependencies]
+test = ["pytest==8.4.2"]
+
+[project.urls]
+Repository = "https://github.com/JAMdotTech/py-jam-bls-bindings"
+Issues = "https://github.com/JAMdotTech/py-jam-bls-bindings/issues"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[[tool.setuptools-rust.ext-modules]]
+target = "jam_bls._native"
+path = "Cargo.toml"
+binding = "PyO3"
+args = ["--locked"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.cibuildwheel]
+build = "cp312-manylinux_* cp312-macosx_*"
+archs = ["native"]
+build-frontend = "build"
+test-requires = ["pytest==8.4.2"]
+test-command = "python -m pytest -q {project}/tests"
+environment = {RUSTFLAGS = "-C target-cpu=generic"}
+
+[tool.cibuildwheel.linux]
+manylinux-x86_64-image = "manylinux2014"
+manylinux-aarch64-image = "manylinux2014"
+before-all = "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal --default-toolchain 1.85.0"
+environment = {PATH = "$HOME/.cargo/bin:$PATH", RUSTFLAGS = "-C target-cpu=generic"}
+
+[tool.cibuildwheel.macos]
+environment = {MACOSX_DEPLOYMENT_TARGET = "11.0", RUSTFLAGS = "-C target-cpu=generic", RUSTUP_TOOLCHAIN = "1.85.0"}

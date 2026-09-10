@@ -1,0 +1,10 @@
+/target/
+/build/
+/dist/
+/wheelhouse/
+/.venv/
+/src/*.egg-info/
+/src/jam_bls/*.so
+/src/jam_bls/*.dylib
+__pycache__/
+.pytest_cache/
