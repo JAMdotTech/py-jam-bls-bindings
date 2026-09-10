@@ -1,6 +1,6 @@
 """Check distributable contents, stable ABI tags, and publishable metadata."""
+import argparse
 import hashlib
-import sys
 import struct
 import tarfile
 import zipfile
@@ -9,8 +9,22 @@ from pathlib import Path
 
 
 def main():
-    artifacts = sorted(Path(sys.argv[1]).glob("*"))
-    artifacts = [p for p in artifacts if p.suffix == ".whl" or p.name.endswith(".tar.gz")]
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("directory", type=Path)
+    parser.add_argument("--version", default="0.1.0")
+    parser.add_argument("--complete", action="store_true")
+    args = parser.parse_args()
+    entries = sorted(args.directory.iterdir())
+    artifacts = [p for p in entries if p.suffix == ".whl" or p.name.endswith(".tar.gz")]
+    if args.complete:
+        assert len(artifacts) == len(entries) == 5, "Expected exactly four wheels and one sdist"
+        assert len([p for p in artifacts if p.name.endswith(".tar.gz")]) == 1
+        assert {("macos" if "macosx" in p.name else "linux", p.stem.rsplit("_", 1)[-1]
+                 if not p.stem.endswith("x86_64") else "x86_64")
+                for p in artifacts if p.suffix == ".whl"} == {
+                    ("macos", "arm64"), ("macos", "x86_64"),
+                    ("linux", "aarch64"), ("linux", "x86_64")}
+
     assert artifacts, "No distribution artifacts supplied"
     for path in artifacts:
         if path.suffix == ".whl":
@@ -35,13 +49,19 @@ def main():
                 metadata_name = next(p for p in names if p.endswith(".dist-info/METADATA"))
                 metadata = BytesParser().parsebytes(archive.read(metadata_name))
                 assert metadata["Name"] == "py-jam-bls-bindings"
-                assert metadata["Version"] == "0.1.0"
+                assert metadata["Version"] == args.version
                 assert metadata["Requires-Python"] == ">=3.12"
                 assert metadata["License-Expression"] == "GPL-3.0-only"
                 for dependency in metadata.get_all("Requires-Dist", []):
                     assert 'extra == "test"' in dependency, dependency
         else:
             with tarfile.open(path) as archive:
+                root = path.name.removesuffix(".tar.gz")
+                info = archive.extractfile(f"{root}/PKG-INFO")
+                assert info is not None
+                metadata = BytesParser().parsebytes(info.read())
+                assert metadata["Name"] == "py-jam-bls-bindings"
+                assert metadata["Version"] == args.version
                 names = {p.partition("/")[2] for p in archive.getnames()}
                 for required in ("Cargo.toml", "Cargo.lock", "rust/src/lib.rs", "pyproject.toml",
                                  "setup.cfg", "LICENSE", "LICENSES/PyJAMaz-Apache-2.0.txt",

@@ -99,3 +99,12 @@ project `py-jam-bls-bindings`, GitHub owner `JAMdotTech`, repository
 that GitHub environment to allow version tags. PyPI setup is described in the
 [official Trusted Publishing guide](https://docs.pypi.org/trusted-publishers/creating-a-project-through-oidc/).
 No long-lived publishing token is stored in this repository.
+
+If the PyPI step fails after all tag-run validations pass, use the manual
+`release.yml` workflow with the original `release_run_id` and `release_tag`.
+It verifies the repository, workflow, tag commit, every validation job, and
+immutable artifact IDs, then downloads those exact artifacts for publication.
+It never rebuilds the release or moves the version tag. The `pypi` environment
+must permit the manually selected workflow ref as well as ordinary release
+tags. Retrying a release that was partially published requires resolving the
+existing-file conflict; this workflow does not silently skip existing files.
