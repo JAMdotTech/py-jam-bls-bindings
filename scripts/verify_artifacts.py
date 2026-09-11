@@ -50,6 +50,7 @@ def main():
                 metadata = BytesParser().parsebytes(archive.read(metadata_name))
                 assert metadata["Name"] == "py-jam-bls-bindings"
                 assert metadata["Version"] == args.version
+                assert metadata["Author-email"] == "JAMdot Technologies <devops@jamdot.tech>"
                 assert metadata["Requires-Python"] == ">=3.12"
                 assert metadata["License-Expression"] == "GPL-3.0-only"
                 for dependency in metadata.get_all("Requires-Dist", []):
@@ -62,6 +63,7 @@ def main():
                 metadata = BytesParser().parsebytes(info.read())
                 assert metadata["Name"] == "py-jam-bls-bindings"
                 assert metadata["Version"] == args.version
+                assert metadata["Author-email"] == "JAMdot Technologies <devops@jamdot.tech>"
                 names = {p.partition("/")[2] for p in archive.getnames()}
                 for required in ("Cargo.toml", "Cargo.lock", "rust/src/lib.rs", "pyproject.toml",
                                  "setup.cfg", "LICENSE", "LICENSES/PyJAMaz-Apache-2.0.txt",

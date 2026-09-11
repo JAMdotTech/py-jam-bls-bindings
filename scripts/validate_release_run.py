@@ -24,6 +24,12 @@ def require(condition, message):
         raise ValueError(message)
 
 
+def release_version(tag):
+    match = re.fullmatch(r"(?:pypi/)?v([0-9]+\.[0-9]+\.[0-9]+(?:[-+][0-9A-Za-z.-]+)?)", tag)
+    require(match is not None, "Expected a version tag")
+    return match.group(1)
+
+
 def validate_run(run, jobs, artifacts, repository, tag, tag_sha, installed_prefix="installed"):
     require(run["repository"]["full_name"] == repository, "Wrong run repository")
     require(run["head_repository"]["full_name"] == repository, "Fork run is not publishable")
@@ -77,8 +83,7 @@ def main():
     parser.add_argument("--installed-job-prefix", default="installed")
     args = parser.parse_args()
     require(re.fullmatch(r"[1-9][0-9]*", args.run_id) is not None, "Invalid run ID")
-    require(re.fullmatch(r"v[0-9]+\.[0-9]+\.[0-9]+(?:[-+][0-9A-Za-z.-]+)?", args.tag) is not None,
-            "Expected a version tag")
+    release_version(args.tag)
     repository = os.environ["GITHUB_REPOSITORY"]
     api_base = os.environ.get("GITHUB_API_URL", "https://api.github.com")
 

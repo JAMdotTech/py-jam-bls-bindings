@@ -87,3 +87,14 @@ def test_artifact_identity_and_completeness(mutation):
     elif mutation == "missing_digest": artifact.pop("digest")
     elif mutation == "duplicate": artifact["name"] = data[2]["artifacts"][1]["name"]
     with pytest.raises(ValueError): validate(data)
+
+
+@pytest.mark.parametrize("tag", ["v0.1.0", "pypi/v0.1.0"])
+def test_release_tag_namespace(tag):
+    assert validator.release_version(tag) == "0.1.0"
+
+
+@pytest.mark.parametrize("tag", ["main", "pypi/main", "pypi/v0.1", "other/v0.1.0", "pypi/v0.1.0/extra"])
+def test_release_tag_rejects_non_version_refs(tag):
+    with pytest.raises(ValueError, match="version tag"):
+        validator.release_version(tag)

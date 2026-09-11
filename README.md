@@ -87,24 +87,28 @@ To cross-verify against a retained original extension on a compatible Python:
 python scripts/cross_verify.py /absolute/path/to/_erasure.cpython-313-darwin.so
 ```
 
-`.github/workflows/release.yml` runs the two Rust tests, builds all four ABI3
-wheels from the source distribution, then verifies installed wheels outside the
-checkout on Python 3.12/3.13/3.14. It publishes only a matching `v0.1.0` tag after
-all checks pass. Dependency upgrades require lockfile review and regression
-validation; release builds use `--locked` and never `target-cpu=native`.
+## Publishing
 
-Before the first release, configure a pending PyPI Trusted Publisher for
-project `py-jam-bls-bindings`, GitHub owner `JAMdotTech`, repository
-`py-jam-bls-bindings`, workflow `release.yml`, environment `pypi`. Configure
-that GitHub environment to allow version tags. PyPI setup is described in the
-[official Trusted Publishing guide](https://docs.pypi.org/trusted-publishers/creating-a-project-through-oidc/).
-No long-lived publishing token is stored in this repository.
+The release workflow builds all four platform wheels from an sdist and tests
+installed binaries outside the checkout on CPython 3.12, 3.13, and 3.14.
+A matching `vVERSION` or `pypi/vVERSION` tag publishes only after all seventeen
+validation jobs pass. The `pypi` GitHub environment uses the organization secret
+`PYPI_API_TOKEN`; it must have permission to publish this PyPI project. Token
+values are never committed or printed. Package author/contact metadata is
+JAMdot Technologies <devops@jamdot.tech>.
 
-If the PyPI step fails after all tag-run validations pass, use the manual
-`release.yml` workflow with the original `release_run_id` and `release_tag`.
-It verifies the repository, workflow, tag commit, every validation job, and
-immutable artifact IDs, then downloads those exact artifacts for publication.
-It never rebuilds the release or moves the version tag. The `pypi` environment
-must permit the manually selected workflow ref as well as ordinary release
-tags. Retrying a release that was partially published requires resolving the
-existing-file conflict; this workflow does not silently skip existing files.
+The original GitHub-only `v0.1.0` tag is retained as extraction evidence. The
+first PyPI release uses `pypi/v0.1.0`, which includes the corrected author
+contact and its newly built artifacts. Do not use the earlier GitHub assets as
+PyPI release artifacts. The artifact checker enforces the approved author email.
+
+If publishing fails after successful validation, run `release.yml` manually
+with the original `release_run_id` and `release_tag`. Recovery verifies the
+repository, workflow, tag commit, all required jobs, and immutable artifact IDs
+before downloading and checking the exact artifacts. It does not rebuild or
+move tags, and does not silently skip previously uploaded files.
+
+Native upgrades require a new package release, lockfile review, regression
+evidence, and an explicit consumer dependency change. Builds use `--locked`
+and portable CPU targets. See [PROVENANCE.md](PROVENANCE.md) for source history
+and licensing.

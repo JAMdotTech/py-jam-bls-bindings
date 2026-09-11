@@ -9,7 +9,7 @@ description = "JAM BLS12-381 double-key signing and aggregation bindings"
 readme = "README.md"
 license = "GPL-3.0-only"
 license-files = ["LICENSE", "LICENSES/*"]
-authors = [{name = "JAMdot Technologies", email = "info@jamdot.tech"}]
+authors = [{name = "JAMdot Technologies", email = "devops@jamdot.tech"}]
 requires-python = ">=3.12"
 classifiers = [
     "Programming Language :: Python :: 3",
@@ -26,6 +26,7 @@ classifiers = [
 test = ["pytest==8.4.2"]
 
 [project.urls]
+Homepage = "https://github.com/JAMdotTech/py-jam-bls-bindings"
 Repository = "https://github.com/JAMdotTech/py-jam-bls-bindings"
 Issues = "https://github.com/JAMdotTech/py-jam-bls-bindings/issues"
 

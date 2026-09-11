@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 rust-version = "1.85"
 license = "GPL-3.0-only"
-authors = ["JAMdot Technologies <info@jamdot.tech>"]
+authors = ["JAMdot Technologies <devops@jamdot.tech>"]
 repository = "https://github.com/JAMdotTech/py-jam-bls-bindings"
 publish = false
 
